@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>images/red-eth-48x48.png</file>
+    <file>images/blu-eth-48x48.png</file>
+    <file>images/yel-eth-48x48.png</file>
+</qresource>
+</RCC>
