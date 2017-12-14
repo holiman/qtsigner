@@ -1,11 +1,12 @@
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import QThread, QWaitCondition,QMutex,QObject,SIGNAL,pyqtSignal,Qt
-
+from PyQt4.QtCore import QByteArray,QBuffer,QIODevice
+from PyQt4.QtGui import QPicture, QPixmap
 import utils
 from utils.tasks import *
 from qt import tx, mainw
-
+from utils.blockies import getIconPNG
 
 class TransactionDialog(QObject, tx.Ui_TxDialog):
 
@@ -64,6 +65,24 @@ class TransactionDialog(QObject, tx.Ui_TxDialog):
 
         self.transactionSignal.connect(self.showTransaction)
 
+        self.lineEdit_to.textChanged.connect(self.toChanged)
+        self.lineEdit_from.textChanged.connect(self.fromChanged)
+
+    def toChanged(self):
+        addr = self.to
+        self.updateIdenticon(self.label_toaccount, addr)
+        pass
+
+    def fromChanged(self):
+        addr = self.fromaccount
+        self.updateIdenticon(self.label_fromaccount, addr)
+
+    def updateIdenticon(self, label, seed):
+
+        picdata = getIconPNG(seed.lower())
+        qp = QPixmap()
+        qp.loadFromData(QByteArray.fromRawData(picdata))
+        label.setPixmap(qp)
 
     def onReject(self):
         self.task.addResponse({

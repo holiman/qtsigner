@@ -121,11 +121,12 @@ class Blocky():
         opts = self.buildOpts(opts)
         return self.renderIcon(opts)
         
-    def getIconPNG(seed, size=8, scale=16):
-        data = io.BytesIO()
-        img = Blocky().createIcon({'seed':seed, 'size':size, 'scale':scale})
-        img.save(data,"png")
-        return data.getvalue() 
+def getIconPNG(seed, size=8, scale=8):
+    data = io.BytesIO()
+    img = Blocky().createIcon({'seed':seed, 'size':size, 'scale':scale})
+    img.save(data,"png")
+    return data.getvalue() 
+
 
 def main():
 
