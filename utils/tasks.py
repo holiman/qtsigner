@@ -18,8 +18,15 @@ class Task(object):
         return x
 
     def addResponse(self, response):
-        self._response = response
-        self._cond.wakeAll()
+        # Don't allow two responses to the same
+        # request. Could possibly happen
+        # if someone clicks accept/reject and simultaneously
+        # closes the window, somehow, triggering
+        # the closeEvent
+        if self._cond:
+            self._response = response
+            self._cond.wakeAll()
+            self._cond = None
 
 def check_perms(filepath):
     """ Validates the signer binary on the path given"""

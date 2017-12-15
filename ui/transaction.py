@@ -10,7 +10,7 @@ from utils.blockies import getIconPNG
 
 class TransactionDialog(QObject, tx.Ui_TxDialog):
 
-    transactionSignal = pyqtSignal(Task)
+    #transactionSignal = pyqtSignal(Task)
 
     def __init__(self):
         QObject.__init__(self)
@@ -63,10 +63,9 @@ class TransactionDialog(QObject, tx.Ui_TxDialog):
         self.pushButton_reject.clicked.connect(self.onReject)
         self.pushButton_approve.clicked.connect(self.onApprove)
 
-        self.transactionSignal.connect(self.showTransaction)
-
         self.lineEdit_to.textChanged.connect(self.toChanged)
         self.lineEdit_from.textChanged.connect(self.fromChanged)
+        self.window.closeEvent = self.closeEvent
 
     def toChanged(self):
         addr = self.to
@@ -90,6 +89,14 @@ class TransactionDialog(QObject, tx.Ui_TxDialog):
         })
         # Then close the window
         self.window.close()
+
+    def closeEvent(self, event):
+        if self.task:
+            self.task.addResponse({
+                "approved" : False,
+            })
+        event.accept()
+
 
     def displayError(self,text):
         #TODO implement a proper UI thingy here
@@ -148,6 +155,7 @@ class TransactionDialog(QObject, tx.Ui_TxDialog):
                 diffs.append((key, old_t[key], new_t[key]))
 
         return diffs
+
 
     @property
     def to(self):

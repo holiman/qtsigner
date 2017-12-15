@@ -18,12 +18,19 @@ class SystrayUI(QObject):
     def __init__(self,receiver, app):
         QObject.__init__(self)
         self.receiver = receiver
+        self.active = False
         #We need to keep a reference to the app, 
         # to signal when to close down
         self.app = app
 
     def setupUi(self,w):
+        
+        # See 
+        #https://stackoverflow.com/questions/43657890/pyqt5-qsystemtrayicon-activated-signal-not-working
         menu = QtGui.QMenu("Signer menu")
+        #menu.aboutToShow.connect(self.activated)
+        w.setContextMenu(menu)
+        self.menu = menu
         # Define menu options
         #openAction = menu.addAction("Open Signer main window")
         #msgAction  = menu.addAction("Show message") 
@@ -41,9 +48,12 @@ class SystrayUI(QObject):
         #reqAction.triggered.connect(lambda x: self.onRequest("Sign tx"))
 
         w.setIcon(QtGui.QIcon(":/images/blu-eth-48x48.png"))
-        w.setContextMenu(menu)
+        #w.setContextMenu(menu)
         self.window = w
-        self.menu = menu
+        #self.menu = menu
+
+        #When the user activates the systray
+        #self.window.activated.connect(self.activated)
 
     def shutdown(self):
         """This is a signal to close shop. We could 
@@ -59,11 +69,26 @@ class SystrayUI(QObject):
     def showMessage(self,title, message):
         self.window.showMessage(title, message)
         
-    def onRequest(self,text):
+    def setActive(self,text):
         """ Call this to make the signer prompt the user that there are actions to perfrom"""
+        self.active = True
         self.window.setIcon(QtGui.QIcon(":/images/red-eth-48x48.png"))
         self.showMessage("Signing Request", text)
+        openAction = self.menu.addAction("Open Signer main window")
+        openAction.triggered.connect(self.activated)
 
+    def setPassive(self):
+        self.active = False
+        self.menu.clear()
+        self.window.setIcon(QtGui.QIcon(":/images/blu-eth-48x48.png"))
+
+    def activated(self):
+
+        print("Systray activated")
+        if self.active:
+            self.setPassive()
+            self.receiver.onSystrayActivated()
+        #event.ignore()
 
 class SystrayReceiver(QObject): 
 

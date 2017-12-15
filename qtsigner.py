@@ -19,12 +19,16 @@ from ui.systray import SystrayUI
 class MainwindowHandler(QObject,mainw.Ui_mainwindow):
 
     logSignal = pyqtSignal(str)
+    taskSignal = pyqtSignal(Task)
 
     def __init__(self, signer_hash):
         QObject.__init__(self)
         mainw.Ui_mainwindow.__init__(self)
         self.shutdowntasks = []
         self.signer_hash = signer_hash
+
+    def setSystrayHandler(self, sysui):
+        self.systray = sysui
 
     def addShutdownTask(self, func):
         self.shutdowntasks.append(func)
@@ -41,6 +45,7 @@ class MainwindowHandler(QObject,mainw.Ui_mainwindow):
         self.label_sha256.setText(self.signer_hash)
         self.window = w
         self.logSignal.connect(self.showLog)
+        self.taskSignal.connect(self.onTask)
 
         def closeEvent( event):
             r = QtGui.QMessageBox.question( w, "Quit?", "Are you sure you want to quit?", QtGui.QMessageBox.Yes,QtGui.QMessageBox.No )
@@ -57,6 +62,29 @@ class MainwindowHandler(QObject,mainw.Ui_mainwindow):
                 w.setWindowState(Qt.WindowMinimized)
 
         w.closeEvent = closeEvent        
+
+    def onTask(self,task):
+        # Note: Do not call this method directly
+        #
+        # No need to use signals here, we arrived here via 
+        # a signal, so should already be in the main UI thread
+
+        # Toggle the systray
+        self.systray.setActive("Signing request received")
+        self.task = task
+
+    def onSystrayActivated(self):
+        task = self.task
+        if task is not None:
+            # Fire up the tx window
+            # TODO! Discern different types of tasks, 
+            # when implementing the remaining operations
+            txwindow =  QtGui.QDialog()
+            txui = TransactionDialog()
+            txui.setupUi(txwindow)
+            txui.showTransaction(task)
+
+        #self.systray.setPassive()
 
     def showLog(self, text):
         self.plainTextEdit.appendPlainText(text.strip())
@@ -156,23 +184,18 @@ def main(args):
 
     mainui = MainwindowHandler(sha_hash)
 
-
-    txwindow =  QtGui.QDialog()
-    txui = TransactionDialog()
-    txui.setupUi(txwindow)
-    #TODO deleteme
-    #txwindow.show()
-
     # The systray
     systrayWindow = QtGui.QSystemTrayIcon()
     sysui = SystrayUI(mainui, app)
     sysui.setupUi(systrayWindow)
     systrayWindow.show()
 
+    mainui.setSystrayHandler(sysui)
+
     (rpcserver, p ) = connectHandler(cmd, serverthread)
 
     # Configure the server thread
-    serverthread.configure(rpcserver,txui.transactionSignal )
+    serverthread.configure(rpcserver,mainui.taskSignal )
     # Connect the stderr-reader to the pipe and the right signal
     stderrthread.configure(p.stderr,mainui.logSignal)
 
