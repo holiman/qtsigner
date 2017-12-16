@@ -5,7 +5,6 @@ import sys
 from PyQt4 import QtGui
 from PyQt4.QtCore import QThread, QWaitCondition,QMutex,QObject,SIGNAL
 from qt import resources
-from utils.windows import WindowUtils
 
 from PyQt4 import QtGui
 
