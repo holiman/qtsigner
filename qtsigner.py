@@ -111,9 +111,9 @@ class ServerThread(QThread, StdIOHandler):
         self.signal = signal
   
     @public
-    def ApproveTx(self,**kwargs):
+    def ApproveTx(self,req):
 
-        task = Task(kwargs)
+        task = Task(req)
         self.signal.emit(task)
         return task.waitForResponse()
 

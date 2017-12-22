@@ -136,7 +136,7 @@ class TransactionDialog(QObject, tx.Ui_TxDialog):
         new_t['approved'] = True
         new_t['password'] = str(QtGui.QInputDialog.getText (self.window, 
                 "Password", 
-                "Enter password for account {}".format(new_t['fromaccount']), 
+                "Enter password for account {}".format(new_t['from']), 
                 mode = QtGui.QLineEdit.Password))
 
         self.task.addResponse(new_t)
@@ -145,8 +145,8 @@ class TransactionDialog(QObject, tx.Ui_TxDialog):
         
     def compareObjects(self, old,new):
         diffs = []
-        if old['fromaccount'] != new['fromaccount']:
-            diffs.append(("fromaccount", old['fromaccount'], new['fromaccount']))
+        if old['from'] != new['from']:
+            diffs.append(("from", old['from'], new['from']))
 
         old_t = old['transaction']
         new_t = new['transaction']
@@ -231,7 +231,7 @@ class TransactionDialog(QObject, tx.Ui_TxDialog):
             return (None, "{} {}".format("from",error))
 
         tx = {}
-        resp = {"fromaccount" : _from, "transaction": tx}
+        resp = {"from" : _from, "transaction": tx}
 
         checks = [
             ("to"   , self.to,     validAddressOrEmpty),
@@ -260,7 +260,7 @@ class TransactionDialog(QObject, tx.Ui_TxDialog):
         self.label_local.setText(txinfo['meta']['local'])
 
         # Tx info
-        self.fromaccount = txinfo['fromaccount']
+        self.fromaccount = txinfo['from']
         self.to = txinfo['transaction']['to']
         self.value =  txinfo['transaction']['value']
         self.gas =  txinfo['transaction']['gas']

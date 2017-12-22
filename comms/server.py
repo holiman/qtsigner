@@ -49,12 +49,8 @@ class StdIOHandler():
         pass
 
     @public
-    def ApproveTx(self,transaction = None, fromaccount = None, call_info = None, meta = None):
+    def ApproveTx(self,req):
         """
-        Example request:
-        
-        {"jsonrpc":"2.0","method":"ApproveTx","params":{"transaction":{"to":null,"gas":null,"gasPrice":null,"value":null,"data":"0x","nonce":null},"from":"0x0000000000000000000000000000000000000000","call_info":null,"meta":{"remote":"signer binary","local":"main","scheme":"in-proc"}},"id":2}
-
         :param transaction: transaction info
         :param call_info: info abou the call, e.g. if ABI info could not be
         :param meta: metadata about the request, e.g. where the call comes from
@@ -62,16 +58,14 @@ class StdIOHandler():
         """
         return {
             "approved" : False,
-            "transaction" : None,
-            "fromaccount" : fromaccount,
+            "transaction" : req.get('transaction'),
+            "from" : req.get('from'),
             "password" : None,
         }
 
     @public
-    def ApproveSignData(self,address=None, raw_data = None, message = None, hash = None, meta = None):
+    def ApproveSignData(self,req):
         """ Example request
-
-        {"jsonrpc":"2.0","method":"ApproveSignData","params":{"address":"0x0000000000000000000000000000000000000000","raw_data":"0x01020304","message":"\u0019Ethereum Signed Message:\n4\u0001\u0002\u0003\u0004","hash":"0x7e3a4e7a9d1744bc5c675c25e1234ca8ed9162bd17f78b9085e48047c15ac310","meta":{"remote":"signer binary","local":"main","scheme":"in-proc"}},"id":3}
 
 
         """
@@ -79,65 +73,53 @@ class StdIOHandler():
                 "password" : None}
 
     @public
-    def ApproveExport(self,address = None, meta = None):
+    def ApproveExport(self,req):
         """ Example request
-
-        {"jsonrpc":"2.0","method":"ApproveExport","params":{"address":"0x0000000000000000000000000000000000000000","meta":{"remote":"signer binary","local":"main","scheme":"in-proc"}},"id":5}
 
         """
         return {"approved" : False}
 
     @public
-    def ApproveImport(self,meta = None):
+    def ApproveImport(self,req):
         """ Example request
-
-        {"jsonrpc":"2.0","method":"ApproveImport","params":{"Meta":{}},"id":4}
 
         """
         return {"approved" : False, "old_password": "", "new_password": ""}
 
     @public
-    def ApproveListing(self,accounts=None, meta = None):
+    def ApproveListing(self,req):
         """ Example request
-
-        {"jsonrpc":"2.0","method":"ApproveListing","params":{"accounts":[{"type":"Account","url":"keystore:///home/user/ethereum/keystore/file","address":"0x010101010101010010101010101abcdef0001337"}],"Meta":{}},"id":2}
         """
         return {'accounts': []}
 
     @public
-    def ApproveNewAccount(self,meta = None):
+    def ApproveNewAccount(self,req):
         """
         Example request
-
-        {"jsonrpc":"2.0","method":"ApproveNewAccount","params":{"meta":{"remote":"signer binary","local":"main","scheme":"in-proc"}},"id":5}
 
         :return:
         """
         return {"approved": False, "password": ""}
 
     @public
-    def ShowError(self,message = ""):
+    def ShowError(self, req):
         """
         Example request:
-
-        {"jsonrpc":"2.0","method":"ShowInfo","params":{"message":"Testing 'ShowError'"},"id":1}
 
         :param text: to show
         :return: nothing
         """
-        sys.stderr.write("Error: {}\n".format( message))
+        sys.stderr.write("Error: {}\n".format( req.get('text')))
         return
 
     @public
-    def ShowInfo(self,message = ""):
+    def ShowInfo(self,req):
         """
-        Example request
-        {"jsonrpc":"2.0","method":"ShowInfo","params":{"message":"Testing 'ShowInfo'"},"id":0}
 
         :param text: to display
         :return:nothing
         """
-        sys.stdout.write("Info: {}\n".format( message))
+        sys.stdout.write("Info: {}\n".format( req.get('text')))
         return
 
 
