@@ -14,6 +14,7 @@ import utils,re
 from tinyrpc.dispatch import public
 from utils.tasks import *
 from ui.transaction import TransactionDialog
+from ui.listing import ListingDialog
 from ui.systray import SystrayUI
 
 class MainwindowHandler(QObject,mainw.Ui_mainwindow):
@@ -76,13 +77,18 @@ class MainwindowHandler(QObject,mainw.Ui_mainwindow):
     def onSystrayActivated(self):
         task = self.task
         if task is not None:
+            window = QtGui.QDialog()
+            ui_constructor = task.getType()
+            ui = ui_constructor()
+            ui.setupUi(window)
+            ui.showRequest(task)
             # Fire up the tx window
             # TODO! Discern different types of tasks, 
             # when implementing the remaining operations
-            txwindow =  QtGui.QDialog()
-            txui = TransactionDialog()
-            txui.setupUi(txwindow)
-            txui.showTransaction(task)
+            #txwindow =  QtGui.QDialog()
+            #txui = TransactionDialog()
+            #txui.setupUi(txwindow)
+            #txui.showTransaction(task)
 
         #self.systray.setPassive()
 
@@ -112,8 +118,15 @@ class ServerThread(QThread, StdIOHandler):
   
     @public
     def ApproveTx(self,req):
-
         task = Task(req)
+        task.setType(TransactionDialog)
+        self.signal.emit(task)
+        return task.waitForResponse()
+
+    @public
+    def ApproveListing(self,req):
+        task = Task(req)
+        task.setType(ListingDialog)
         self.signal.emit(task)
         return task.waitForResponse()
 
@@ -173,8 +186,9 @@ def main(args):
 
     
     if not check_perms(binary):
-        sys.exit(0)
-
+        #sys.exit(0)
+        pass # ... for now....
+        
     app = QtGui.QApplication(sys.argv)
 
 

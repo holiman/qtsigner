@@ -29,3 +29,11 @@ It currently has a systray icon, but there's not anything connected to it.
 It currently has no packaging/bundling, which should be provided as part of a proper install. 
 
 Also, the code could be more pythonic and nice. All hands appreciated!
+
+## Screenshots
+
+A few screenshots: 
+
+![transactions](screenshot.png)
+
+![listing](listing.png)

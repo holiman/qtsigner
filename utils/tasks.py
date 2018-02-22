@@ -28,6 +28,16 @@ class Task(object):
             self._cond.wakeAll()
             self._cond = None
 
+    def setType(self, dialogType):
+        """ Set what type of task this is. The dialogtype is 
+        the construtor for the Dialog that is to be invoked, 
+        when onSystrayActivated is invoked later on"""
+
+        self.dialogType = dialogType
+
+    def getType(self):
+        return self.dialogType 
+
 def check_perms(filepath):
     """ Validates the signer binary on the path given"""
     import os
@@ -104,6 +114,11 @@ def validAddressOrEmpty(text, allow_empty=True):
 
     return (text, None)
 
+def validAddress(text):
+    """
+    returns ( address, error-msg )
+    """
+    return validAddressOrEmpty(text, False)
 def validInt( text):
     """
     Tries to parse an input-text as if it was an int. 

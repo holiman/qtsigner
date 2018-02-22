@@ -265,8 +265,6 @@ class Ui_TxDialog(object):
         self.textEdit_callinfo.setReadOnly(True)
         self.textEdit_callinfo.setObjectName(_fromUtf8("textEdit_callinfo"))
         self.horizontalLayout_12.addWidget(self.textEdit_callinfo)
-        self.groupBox_2.raise_()
-        self.groupBox_2.raise_()
         self.verticalLayout.addWidget(self.groupBox_3)
         self.horizontalGroupBox_8 = QtGui.QGroupBox(TxDialog)
         self.horizontalGroupBox_8.setObjectName(_fromUtf8("horizontalGroupBox_8"))

@@ -42,6 +42,10 @@ class TransactionDialog(QObject, tx.Ui_TxDialog):
         super().setupUi(dialog)
         self.window = dialog
         # Connect edit-checkboxes
+        self.pushButton_reject.clicked.connect(self.onReject)
+        self.pushButton_approve.clicked.connect(self.onApprove)
+        self.window.closeEvent = self.closeEvent
+
         self.checkBox_editfrom.stateChanged.connect(    lambda x: self.lineEdit_from.setEnabled(bool(x)))
         self.checkBox_editto.stateChanged.connect(      lambda x: self.lineEdit_to.setEnabled(bool(x)))
         self.checkBox_editvalue.stateChanged.connect(   lambda x: self.lineEdit_value.setEnabled(bool(x)) or self.comboBox_value.setEnabled(bool(x)))
@@ -60,12 +64,9 @@ class TransactionDialog(QObject, tx.Ui_TxDialog):
         self.lineEdit_gasprice.textChanged.connect(recalc_gasprice)
         self.comboBox_gasprice.currentIndexChanged.connect(recalc_gasprice)
 
-        self.pushButton_reject.clicked.connect(self.onReject)
-        self.pushButton_approve.clicked.connect(self.onApprove)
 
         self.lineEdit_to.textChanged.connect(self.toChanged)
         self.lineEdit_from.textChanged.connect(self.fromChanged)
-        self.window.closeEvent = self.closeEvent
 
     def toChanged(self):
         addr = self.to
@@ -136,7 +137,7 @@ class TransactionDialog(QObject, tx.Ui_TxDialog):
         new_t['approved'] = True
         new_t['password'] = str(QtGui.QInputDialog.getText (self.window, 
                 "Password", 
-                "Enter password for account {}".format(new_t['from']), 
+                "Enter password for account {}".format(new_t['transaction']['from']), 
                 mode = QtGui.QLineEdit.Password))
 
         self.task.addResponse(new_t)
@@ -145,12 +146,10 @@ class TransactionDialog(QObject, tx.Ui_TxDialog):
         
     def compareObjects(self, old,new):
         diffs = []
-        if old['from'] != new['from']:
-            diffs.append(("from", old['from'], new['from']))
 
         old_t = old['transaction']
         new_t = new['transaction']
-        for key in ['to','value','gas','gasPrice','nonce','data']:
+        for key in ['from','to','value','gas','gasPrice','nonce','data']:
             if old_t[key] != new_t[key]:
                 diffs.append((key, old_t[key], new_t[key]))
 
@@ -231,9 +230,10 @@ class TransactionDialog(QObject, tx.Ui_TxDialog):
             return (None, "{} {}".format("from",error))
 
         tx = {}
-        resp = {"from" : _from, "transaction": tx}
+        resp = {"transaction": tx}
 
         checks = [
+            ("from"   ,self.fromaccount, validAddress),
             ("to"   , self.to,     validAddressOrEmpty),
             ("value", self.value,  validInt),
             ("gas"  , self.gas,    validInt),
@@ -252,25 +252,29 @@ class TransactionDialog(QObject, tx.Ui_TxDialog):
         # All ok
         return (resp, None)
 
-    def showTransaction(self, task):
-        txinfo = task.getRequest()
+    def showRequest(self, task):
+        req = task.getRequest()
         # Request info
-        self.label_remote.setText(txinfo['meta']['remote'])
-        self.label_transport.setText(txinfo['meta']['scheme'])
-        self.label_local.setText(txinfo['meta']['local'])
+        self.label_remote.setText(req['meta']['remote'])
+        self.label_transport.setText(req['meta']['scheme'])
+        self.label_local.setText(req['meta']['local'])
 
         # Tx info
-        self.fromaccount = txinfo['from']
-        self.to = txinfo['transaction']['to']
-        self.value =  txinfo['transaction']['value']
-        self.gas =  txinfo['transaction']['gas']
-        self.gasPrice =  txinfo['transaction']['gasPrice']
-        self.nonce = txinfo['transaction']['nonce']
-        self.data = txinfo['transaction']['data']
+        self.fromaccount = req['transaction']['from']
+        self.to = req['transaction']['to']
+        self.value =  req['transaction']['value']
+        self.gas =  req['transaction']['gas']
+        self.gasPrice =  req['transaction']['gasPrice']
+        self.nonce = req['transaction']['nonce']
+        self.data = req['transaction']['data']
 
-        # Callinfo
-        self.textEdit_callinfo.setText(txinfo['call_info'])
-        self.originalTx = txinfo
+        # Callinfo is a list of key-value mappings
+        # like [{type:"Warning", "message": "foo"}]
+
+        callinfo_text = "\n".join(["* {} : {}".format(d['type'], d['message']) for d in req['call_info']])
+
+        self.textEdit_callinfo.setText(callinfo_text)
+        self.originalTx = req
         self.task = task
 
         self.window.show()

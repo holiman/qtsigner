@@ -59,7 +59,6 @@ class StdIOHandler():
         return {
             "approved" : False,
             "transaction" : req.get('transaction'),
-            "from" : req.get('from'),
             "password" : None,
         }
 
